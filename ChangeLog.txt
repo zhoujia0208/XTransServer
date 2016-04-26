@@ -1,0 +1,89 @@
+﻿V3.2.2.3 20160416
+	1、增加XDataRaw类的一些方法，修改了几个内部函数名称，使其更通用
+	2、修改XTool中的一些函数声明，对一些函数的参数增加const关键字，避免使用出错
+
+V3.2.2.2 20160412
+	1、修正openssl使用过程中的多线程互斥问题
+
+V3.2.2.1 20160125
+	1、修正XSocket中异步操作XAsyncResult的完成标志未做重置初始化的问题
+
+V3.2.2.0 20151223
+	1、XSocket类的Write方法增加多组数据发送
+	2、累积细节问题修正
+
+V3.2.2.0 20151106
+	1、HttpListener性能优化，在线程中解析报文
+	2、HttpsListener性能优化，在线程中进行SSL组包拆包和Http解析
+	3、HttpsListener增加双向认证功能和配置
+
+V3.2.1.0 20151027
+	累积问题修复和细节调整。
+
+V3.2.0.4 20150908
+	1、XSocket类中新增SocketId属性记录socketId。
+	2、XAsyncResult类中m_pInnerClass属性修改为public，便于其他灵活的使用。
+
+V3.2.0.3 20150722
+	修正写回调中打印已释放的SocketId导致可能程序崩溃的bug。
+
+V3.2.0.2 20150715
+	优化通讯相关部分，去除超时回调，统一到对应操作的返回回调中。
+
+V3.2.0.2 20150711
+	优化写日志时判断日期的方法。
+
+V3.2.0.1 20150619
+	XDataTable类新增Dispose方法，便于重复使用XDataTable类时，释放之前占用的资源。
+
+V3.2.0.0 20150612
+	1、增加对Https的支持，配置文件新增HttpsListener配置，相对Http的多了CertFile和PrivateKeyFile配置来确定服务端证书和私钥文件，目前仅支持PEM格式文件。
+
+V3.1.0.1 20150526
+	1、增加对Http的304的判断，判断文件是否最新，节省网络开销
+
+V3.1.0.0 20150522
+	1、重构通讯层的架构，由XSocket往上派生，分不同类型的Listener来监听处理
+	2、配置文件结构调整，拆分原Listener配置为TcpListener和HttpListener，对应不同配置选项
+
+V3.0.0.6 20150421
+	1、统一配置数据的结构
+
+V3.0.0.5 20150420
+	1、XDbTransaction执行sql的方法添加
+	2、框架配置文件增加xsd的校验功能
+
+V3.0.0.4 20150416
+	1、新增不带事务的批量ExecuteSql方法
+
+V3.0.0.3 20150415
+	1、XDataTable相关改进：
+		a)增加XDataColumn表示数据列的信息
+		b)新增行AddRow/NewRow时，XDataRow绑定XDataTable信息（暂时不做行、列数据类型检查，由调用方保证）
+	2、XDataValue改进：
+		a)统一封装自有数据库时间类XDataTime，二进制数据类XDataRaw
+		b)统一归类自有数据类型为9种类型，重写构造和析构。
+	3、XOracleConnection改进：
+		a)新增Oracle的时间与自有数据库时间类XDataTime互相转换的函数
+		b)批量参数ExecuteSql和带参数Query时统一调用参数执行sql方法(RowExecuteOtl)
+	4、XTools中新增struct tm/time_t 与 自有数据库时间类XDataTime互相转换的函数
+V3.0.0.2 20150414
+	1、XDataValue改进，核心变量改为私有参数
+	2、XOracleConnection改进：
+		a)对应原直接访问XDataValue的方式修改为 间接方式赋值XDataValue
+
+V3.0.0.1 20150411
+	1、XDataBase相关结构改进：
+		a)由事务类Transaction来提交和回滚
+		b)为了提高效率，去除了事务检查机制，由调用方控制事务，更灵活
+	2、XDataTable数据相关类，去除otlv4.h的引用。和具体XDataBaseConnection的实现剥离。
+	3、增加对oracle clob和blob的支持
+
+V3.0.0.0
+统一代码字符集为UTF-8，后台Linux屏显/文本日志同样统一为UTF-8字符集，便于将来的移植和数据库字符集支持
+
+V2.0.0.0
+添加Http报文的解析支持
+
+V1.0.0.0
+基础通讯架构搭建

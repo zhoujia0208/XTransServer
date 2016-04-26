@@ -1,0 +1,183 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="Config" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:simpleType name="BoolType">
+    <xs:restriction base="xs:int">
+      <xs:pattern value="0|1"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="LoggerPriorityType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="debug"/>
+      <xs:enumeration value="info"/>
+      <xs:enumeration value="notice"/>
+      <xs:enumeration value="warn"/>
+      <xs:enumeration value="error"/>
+      <xs:enumeration value="crit"/>
+      <xs:enumeration value="alert"/>
+      <xs:enumeration value="fatal"/>
+      <xs:enumeration value="emerg"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="DataBaseType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="oracle"/>
+      <xs:enumeration value="sqlserver"/>
+      <xs:enumeration value="mysql"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="PackageLengthType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="byte|bcd|string|none"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="TranCodeType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="byte|bcd|string"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:attributeGroup name="TcpListenerAttr">
+    <xs:attribute name="Name" type="xs:string" use="required"/>
+    <xs:attribute name="Port" type="xs:unsignedShort" use="required"/>
+    <xs:attribute name="MaxConnectCount" type="xs:unsignedInt" use="required"/>
+    <xs:attribute name="TimeOut" type="xs:unsignedInt" use="required"/>
+  </xs:attributeGroup>
+  <xs:attributeGroup name="HttpListenerAttr">
+    <xs:attributeGroup ref="TcpListenerAttr"/>
+    <xs:attribute name="LocalPath" type="xs:string" use="required"/>
+    <xs:attribute name="DefaultPage" type="xs:string" use="required"/>
+  </xs:attributeGroup>
+  <xs:attributeGroup name="HttpsListenerAttr">
+    <xs:attributeGroup ref="HttpListenerAttr"/>
+    <xs:attribute name="ServerCert" type="xs:string" use="required"/>
+    <xs:attribute name="ServerPrivateKey" type="xs:string" use="required"/>
+    <xs:attribute name="VerifyPeer" type="BoolType" use="optional"/>
+    <xs:attribute name="TrustCert" type="xs:string" use="optional"/>
+  </xs:attributeGroup>
+  <xs:complexType name="TransactionListType">
+    <xs:sequence>
+      <xs:element name="Transaction" minOccurs="1" maxOccurs="unbounded">
+        <xs:complexType>
+          <xs:attribute name="TranCode" type="xs:string" use="required"/>
+          <xs:attribute name="CallSerivce" type="xs:string" use="required"/>
+          <xs:attribute name="NeedResponse" type="BoolType" use="required"/>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  
+  <xs:element name="Config">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Logger" minOccurs="1" maxOccurs="1">
+          <xs:complexType>
+            <xs:attribute name="Priority" type="LoggerPriorityType" use="required"/>
+            <xs:attribute name="ScreenPrint" type="BoolType" use="required"/>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="ThreadPool" minOccurs="1" maxOccurs="1">
+          <xs:complexType>
+            <xs:attribute name="Size" type="xs:unsignedInt" use="required"/>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="TcpClientPools" minOccurs="0" maxOccurs="1">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="TcpClientPool" minOccurs="1" maxOccurs="unbounded">
+                <xs:complexType>
+                  <xs:attribute name="Name" type="xs:string" use="required"/>
+                  <xs:attribute name="RemoteIP" type="xs:string" use="required"/>
+                  <xs:attribute name="RemotePort" type="xs:unsignedShort" use="required"/>
+                  <xs:attribute name="Keep" type="BoolType" use="required"/>
+                  <xs:attribute name="ConnectCount" type="xs:unsignedInt" use="optional" default="0"/>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="DataBase" minOccurs="0" maxOccurs="unbounded">
+            <xs:complexType>
+              <xs:attribute name="Name" type="xs:string" use="required"/>
+              <xs:attribute name="Type" type="DataBaseType" use="required"/>
+              <xs:attribute name="ConnectString" type="xs:string" use="required"/>
+              <xs:attribute name="ConnectCount" type="xs:unsignedInt" use="required"/>
+              <xs:attribute name="HeartBeatInterval" type="xs:unsignedInt" use="required"/>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="TcpListener" minOccurs="0" maxOccurs="unbounded">
+            <xs:complexType>
+              <xs:all>
+                <xs:element name="PackageLength" minOccurs="1" maxOccurs="1">
+                  <xs:complexType>
+                    <xs:attribute name="Type" type="PackageLengthType" use="required"/>
+                    <xs:attribute name="Offset" type="xs:unsignedInt" use="required"/>
+                    <xs:attribute name="Length" type="xs:unsignedInt" use="required"/>
+                    <xs:attribute name="LengthOffset" type="xs:unsignedInt" use="required"/>
+                  </xs:complexType>
+                </xs:element>
+                <xs:element name="TranCode" minOccurs="1" maxOccurs="1">
+                  <xs:complexType>
+                    <xs:attribute name="Type" type="TranCodeType" use="required"/>
+                    <xs:attribute name="Offset" type="xs:unsignedInt" use="required"/>
+                    <xs:attribute name="Length" type="xs:unsignedInt" use="required"/>
+                  </xs:complexType>
+                </xs:element>
+                <xs:element name="TransactionList" type="TransactionListType" minOccurs="1" maxOccurs="1"/>
+              </xs:all>
+              <xs:attributeGroup ref="TcpListenerAttr"/>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="HttpListener" minOccurs="0" maxOccurs="unbounded">
+            <xs:complexType>
+              <xs:all>
+                <xs:element name="TranCode" minOccurs="1" maxOccurs="1">
+                  <xs:complexType>
+                    <xs:attribute name="Type" type="xs:string" fixed="uri" use="required"/>
+                    <xs:attribute name="Offset" type="xs:unsignedInt" use="optional"/>
+                    <xs:attribute name="Length" type="xs:unsignedInt" use="optional"/>
+                  </xs:complexType>
+                </xs:element>
+                <xs:element name="TransactionList" type="TransactionListType" minOccurs="0" maxOccurs="1"/>
+              </xs:all>
+              <xs:attributeGroup ref="HttpListenerAttr"/>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="HttpsListener" minOccurs="0" maxOccurs="unbounded">
+            <xs:complexType>
+              <xs:all>
+                <xs:element name="TranCode" minOccurs="1" maxOccurs="1">
+                  <xs:complexType>
+                    <xs:attribute name="Type" type="xs:string" fixed="uri" use="required"/>
+                    <xs:attribute name="Offset" type="xs:unsignedInt" use="optional"/>
+                    <xs:attribute name="Length" type="xs:unsignedInt" use="optional"/>
+                  </xs:complexType>
+                </xs:element>
+                <xs:element name="TransactionList" type="TransactionListType" minOccurs="0" maxOccurs="1"/>
+              </xs:all>
+              <xs:attributeGroup ref="HttpsListenerAttr"/>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="NormalService" minOccurs="0" maxOccurs="unbounded">
+            <xs:complexType>
+              <xs:attribute name="Name" type="xs:string" use="required"/>
+              <xs:attribute name="DataBase" type="xs:string" use="optional"/>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="LoopService" minOccurs="0" maxOccurs="unbounded">
+            <xs:complexType>
+              <xs:attribute name="Name" type="xs:string" use="required"/>
+              <xs:attribute name="DataBase" type="xs:string" use="optional"/>
+              <xs:attribute name="Interval" type="xs:int" use="required"/>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="ConfigValue" minOccurs="0" maxOccurs="unbounded">
+            <xs:complexType>
+              <xs:attribute name="Key" type="xs:string" use="required"/>
+              <xs:attribute name="Value" type="xs:string" use="required"/>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
