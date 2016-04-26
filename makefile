@@ -1,6 +1,6 @@
 SRCDIR ?= $(CURDIR)
 HEADERDIR = ./include
-LIBDIR = ./lib
+LIBDIR = ./lib64
 APPDIR = $(HOME)/bin
 VPATH = ./src/XTransServer
 
