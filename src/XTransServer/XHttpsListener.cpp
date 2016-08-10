@@ -290,14 +290,14 @@ namespace XNet {
 					return;
 				}
 
-				XLogClass::debug("HttpsProcess handshake iFlag[%d]", iError);
+				//XLogClass::debug("HttpsProcess handshake iFlag[%d]", iError);
 				pXThreadData->m_iStatus = pXConnection->PrepareWriteData(vBuffers);
 				return;
 			}
 
 			//握手正常完成,再判断后面有没有收到数据
 			pXConnection->m_isSslConnected = true;
-			XLogClass::debug("HttpsProcess SSL_do_handshake OK SocketId[%lld]", pXConnection->m_i64SocketId);
+			//XLogClass::debug("HttpsProcess SSL_do_handshake OK SocketId[%lld]", pXConnection->m_i64SocketId);
 		}
 
 		if (pXConnection->m_pXHttpContext == NULL)
