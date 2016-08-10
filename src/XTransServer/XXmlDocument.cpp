@@ -46,6 +46,11 @@ XXmlDocument::XXmlDocument()
 
 XXmlDocument::~XXmlDocument()
 {
+	Dispose();
+}
+
+void XXmlDocument::Dispose()
+{
 	if (m_pDoc)
 	{
 		xmlFreeDoc(m_pDoc);
@@ -62,6 +67,20 @@ int XXmlDocument::OpenFile(string strXmlFilePath)
 	//xmlKeepBlanksDefault(0);
 	m_pDoc = xmlReadFile(m_strFilePath.c_str(), NULL, XML_PARSE_RECOVER);
 	//m_pDoc = xmlParseFile(m_strFilePath.c_str());
+	m_pRootNode = xmlDocGetRootElement(m_pDoc);
+
+	if (m_pRootNode == NULL)
+	{
+		return X_FAILURE;
+	}
+
+	return X_SUCCESS;
+}
+
+int XXmlDocument::ReadString(string &strXmlString)
+{
+	//xmlKeepBlanksDefault(0);
+	m_pDoc = xmlReadMemory(strXmlString.c_str(), strXmlString.size(), NULL, NULL, XML_PARSE_RECOVER);
 	m_pRootNode = xmlDocGetRootElement(m_pDoc);
 
 	if (m_pRootNode == NULL)

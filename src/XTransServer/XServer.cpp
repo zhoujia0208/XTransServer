@@ -6,7 +6,7 @@
 #include "XTcpClient.h"
 #include "XServer.h"
 
-#define XVERSIONNO "3.2.2.3"
+#define XVERSIONNO "3.2.2.4"
 
 static uv_mutex_t *g_pMutex;
 static void lock_callback(int mode, int type, const char *file, int line)

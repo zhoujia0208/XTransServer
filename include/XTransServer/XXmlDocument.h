@@ -27,7 +27,9 @@ public:
 	XXmlDocument();
 	~XXmlDocument();
 
+	void Dispose();
 	int OpenFile(string strXmlFilePath);
+	int ReadString(string &strXmlString);
 	int XsdValidate(string strXsdFilePath);
 	xmlXPathObjectPtr searchNodesByPath(string strExpress);
 
