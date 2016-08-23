@@ -38,6 +38,12 @@ namespace XConfig {
 		XSERVICETYPE_LOOP,
 	};
 
+	enum XHostType
+	{
+		XHOSTTYPE_IP = 0,
+		XHOSTTYPE_HOSTNAME,
+	};
+
 	class XLengthInfo
 	{
 	public:
@@ -139,7 +145,8 @@ namespace XConfig {
 	public:
 		XTcpClientPoolInfo();
 		string m_strName;
-		string m_strRemoteIP;
+		XHostType m_xType;
+		string m_strRemoteHost;
 		int m_iRemotePort;
 		int m_iKeep;
 		int m_iConnectCount;

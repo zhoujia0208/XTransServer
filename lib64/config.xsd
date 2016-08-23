@@ -5,6 +5,12 @@
       <xs:pattern value="0|1"/>
     </xs:restriction>
   </xs:simpleType>
+  <xs:simpleType name="HostType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="ip"/>
+      <xs:enumeration value="hostname"/>
+    </xs:restriction>
+  </xs:simpleType>
   <xs:simpleType name="LoggerPriorityType">
     <xs:restriction base="xs:string">
       <xs:enumeration value="debug"/>
@@ -85,7 +91,8 @@
               <xs:element name="TcpClientPool" minOccurs="1" maxOccurs="unbounded">
                 <xs:complexType>
                   <xs:attribute name="Name" type="xs:string" use="required"/>
-                  <xs:attribute name="RemoteIP" type="xs:string" use="required"/>
+                  <xs:attribute name="Type" type="HostType" use="optional" default="ip"/>
+                  <xs:attribute name="RemoteHost" type="xs:string" use="required"/>
                   <xs:attribute name="RemotePort" type="xs:unsignedShort" use="required"/>
                   <xs:attribute name="Keep" type="BoolType" use="required"/>
                   <xs:attribute name="ConnectCount" type="xs:unsignedInt" use="optional" default="0"/>

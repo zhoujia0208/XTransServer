@@ -1,24 +1,54 @@
 ﻿#include "StdAfx.h"
 #include "XTcpClient.h"
 
-int XTcpClientPool::Initialize(string strName, string strRemoteIP, int iRemotePort, int iConnectCount)
+XTcpClientPool::XTcpClientPool()
 {
-	XLogClass::info("XTcpClientPool::Initialize [%s],IP[%s],Port[%d],ConnectCount[%d]", 
-		strName.c_str(), strRemoteIP.c_str(), iRemotePort, iConnectCount);
-	m_strName = strName;
-	m_strRemoteIP = strRemoteIP;
-	m_iRemotePort = iRemotePort;
-	m_iConnectCount = iConnectCount;
 	m_iIndex = 0;
-	for(int i = 0; i < iConnectCount; i++)
+	m_iNewIndex = 0;
+}
+
+int XTcpClientPool::Initialize(XConfig::XTcpClientPoolInfo *pInfo)
+{
+	m_pInfo = pInfo;
+	XLogClass::info("XTcpClientPool::Initialize[%s],Type[%d],Host[%s],Port[%d],ConnectCount[%d]", 
+		m_pInfo->m_strName.c_str(), m_pInfo->m_xType, m_pInfo->m_strRemoteHost.c_str(), m_pInfo->m_iRemotePort, m_pInfo->m_iConnectCount);
+	
+	m_vRemoteIPs.clear();
+	if (m_pInfo->m_xType == XConfig::XHOSTTYPE_IP)
+		m_vRemoteIPs.push_back(m_pInfo->m_strRemoteHost);
+	else
+	{
+
+		struct addrinfo *answer, hint, *curr;
+		memset(&hint, 0x00, sizeof(hint));
+		hint.ai_family = AF_INET;
+		hint.ai_socktype = SOCK_STREAM;
+
+		int ret = getaddrinfo(m_pInfo->m_strRemoteHost.c_str(), NULL, &hint, &answer);
+		if (ret != 0) {
+			XLogClass::error("getaddrinfo: &s/n", gai_strerror(ret));
+			return X_FAILURE;
+		}
+
+		char cIP[16];
+		for (curr = answer; curr != NULL; curr = curr->ai_next) {
+			inet_ntop(AF_INET, &(((struct sockaddr_in *)(curr->ai_addr))->sin_addr), cIP, sizeof(cIP));
+			XLogClass::info("HostName[%s] getaddrinfo IP[%d][%s]", m_pInfo->m_strRemoteHost.c_str(), m_vRemoteIPs.size(), cIP);
+			m_vRemoteIPs.push_back(cIP);
+		}
+		freeaddrinfo(answer);
+	}
+	m_iIndex = 0;
+	m_iNewIndex = 0;
+	for(int i = 0; i < m_pInfo->m_iConnectCount; i++)
 	{
 		XTcpClient *pXTcpClient = new XTcpClient();
 		//Tcp连接初始化错误，暂时不做处理，等后续长链接的心跳服务等恢复链接
-		pXTcpClient->Connect(m_strRemoteIP, m_iRemotePort);
+		pXTcpClient->Connect(m_vRemoteIPs[i % m_vRemoteIPs.size()], m_pInfo->m_iRemotePort);
 		m_vTcpClient.push_back(pXTcpClient);
 	}
 
-	XLogClass::info("XTcpClientPool::Initialize [%s] Success", strName.c_str());
+	XLogClass::info("XTcpClientPool::Initialize [%s] Success", m_pInfo->m_strName.c_str());
 	return X_SUCCESS;
 }
 
@@ -41,14 +71,14 @@ int XTcpClientPool::Release()
 
 int XTcpClientPool::GetTcpClient(XTcpClient *&pXTcpClient)
 {
-	if(m_iIndex >= m_iConnectCount)
+	if(m_iIndex >= m_pInfo->m_iConnectCount)
 	{
 		XLogClass::error("XTcpClientPool::GetTcpClient m_iIndex >= m_iConnectCount");
 		return X_FAILURE;
 	}
 
 	pXTcpClient = m_vTcpClient[m_iIndex++];
-	if(m_iIndex >= m_iConnectCount)
+	if(m_iIndex >= m_pInfo->m_iConnectCount)
 		m_iIndex = 0;
 
 	return X_SUCCESS;
@@ -63,10 +93,20 @@ int XTcpClientPool::GetTcpClientVector(vector<XTcpClient * >&vTcpClient)
 
 int XTcpClientPool::GetNewTcpClient(XTcpClient *&pXTcpClient)
 {
+	if (m_iNewIndex >= m_vRemoteIPs.size())
+	{
+		XLogClass::error("XTcpClientPool::GetNewTcpClient m_iNewIndex >= m_vRemoteIPs.size()");
+		return X_FAILURE;
+	}
+
 	pXTcpClient = new XTcpClient();
-	XTcpResult xTcpResult = pXTcpClient->Connect(m_strRemoteIP, m_iRemotePort);
+	XTcpResult xTcpResult = pXTcpClient->Connect(m_vRemoteIPs[m_iNewIndex], m_pInfo->m_iRemotePort);
 	if (xTcpResult != Success)
 		return X_FAILURE;
+
+	m_iNewIndex++;
+	if (m_iNewIndex >= m_vRemoteIPs.size())
+		m_iNewIndex = 0;
 	return X_SUCCESS;
 }
 

@@ -1,4 +1,10 @@
-﻿V3.2.2.4 20160514
+﻿V3.2.3.0 20160823
+	1、修改XTcpClientPool的Initialize方法，支持域名解析，多个连接连到不同IP地址
+	2、修改XConfig命名空间中增加XHostType枚举，支持配置域名的连接池
+	3、配置文件中，原连接池的RemoteIP属性修改为RemoteHost，增加Type属性，默认为IP类型。如需要使用域名类型，则Type="hostname"
+
+
+V3.2.2.4 20160514
 	1、增加XXmlDocument的一些实用方法
 
 V3.2.2.3 20160416

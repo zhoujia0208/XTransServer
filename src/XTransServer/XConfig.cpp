@@ -52,6 +52,7 @@ namespace XConfig {
 
 	XTcpClientPoolInfo::XTcpClientPoolInfo()
 	{
+		m_xType = XHOSTTYPE_IP;
 		m_iRemotePort = 0;
 		m_iKeep = 0;
 		m_iConnectCount = 0;
@@ -102,6 +103,14 @@ namespace XConfig {
 	};
 	size_t szTranCodeType = sizeof(g_mapTranCodeTypeValues) / sizeof(map<string, XTranCodeType>::value_type);
 	const map<string, XTranCodeType> g_mapTranCodeType(g_mapTranCodeTypeValues, g_mapTranCodeTypeValues + szTranCodeType);
+
+	const map<string, XHostType>::value_type g_mapHostTypeValues[] =
+	{
+		map<string, XHostType>::value_type("ip", XHOSTTYPE_IP),
+		map<string, XHostType>::value_type("hostname", XHOSTTYPE_HOSTNAME),
+	};
+	size_t szHostType = sizeof(g_mapHostTypeValues) / sizeof(map<string, XHostType>::value_type);
+	const map<string, XHostType> g_mapHostType(g_mapHostTypeValues, g_mapHostTypeValues + szHostType);
 
 	void ReadListenerConfig(xmlNodePtr pNode, XListenerInfo *pXListenerInfo)
 	{
@@ -155,12 +164,16 @@ namespace XConfig {
 			XXmlNodeList xTcpClient = xConfigXml.searchNodesByPath("/Config/TcpClientPools/TcpClientPool");
 			for (int i = 0; i < (int)xTcpClient.size(); i++)
 			{
+				char *p = NULL;
 				XTcpClientPoolInfo *pXTcpClientPoolInfo = new XTcpClientPoolInfo();
 				pXTcpClientPoolInfo->m_strName = (char *)xmlGetProp(xTcpClient[i], BAD_CAST"Name");
-				pXTcpClientPoolInfo->m_strRemoteIP = (char *)xmlGetProp(xTcpClient[i], BAD_CAST"RemoteIP");
+				p = (char *)xmlGetProp(xTcpClient[i], BAD_CAST"Type");
+				if (p != NULL)
+					pXTcpClientPoolInfo->m_xType = g_mapHostType.find(p)->second;
+				pXTcpClientPoolInfo->m_strRemoteHost = (char *)xmlGetProp(xTcpClient[i], BAD_CAST"RemoteHost");
 				pXTcpClientPoolInfo->m_iRemotePort = atoi((char *)xmlGetProp(xTcpClient[i], BAD_CAST"RemotePort"));
 				pXTcpClientPoolInfo->m_iKeep = atoi((char *)xmlGetProp(xTcpClient[i], BAD_CAST"Keep"));
-				char *p = (char *)xmlGetProp(xTcpClient[i], BAD_CAST"ConnectCount");
+				p = (char *)xmlGetProp(xTcpClient[i], BAD_CAST"ConnectCount");
 				if(p != NULL)
 					pXTcpClientPoolInfo->m_iConnectCount = atoi(p);
 				g_xAppConfigInfo.m_mapPXTcpClientPoolInfo[pXTcpClientPoolInfo->m_strName] = pXTcpClientPoolInfo;

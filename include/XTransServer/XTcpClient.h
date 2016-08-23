@@ -50,10 +50,10 @@ private:
 class XTcpClientPool
 {
 public:
-	//XTcpClientPool();
+	XTcpClientPool();
 	~XTcpClientPool();
 
-	int Initialize(string strName, string strRemoteIP, int iRemotePort, int iConnectCount);
+	int Initialize(XConfig::XTcpClientPoolInfo *pInfo);
 	int Release();
 
 	//获取一个可用的连接，暂时简单点，循环获取
@@ -64,11 +64,10 @@ public:
 	int GetNewTcpClient(XTcpClient *&pXTcpClient);
 private:
 	vector<XTcpClient *> m_vTcpClient;
-	string m_strName;
-	string m_strRemoteIP;
-	int m_iRemotePort;
-	int m_iConnectCount;
+	XConfig::XTcpClientPoolInfo *m_pInfo;
+	vector<string> m_vRemoteIPs;
 	int m_iIndex;
+	int m_iNewIndex;
 };
 
 extern map<string, XTcpClientPool *> g_mapTcpClientPool;

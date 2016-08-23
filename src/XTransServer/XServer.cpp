@@ -6,7 +6,7 @@
 #include "XTcpClient.h"
 #include "XServer.h"
 
-#define XVERSIONNO "3.2.2.4"
+#define XVERSIONNO "3.2.3.0"
 
 static uv_mutex_t *g_pMutex;
 static void lock_callback(int mode, int type, const char *file, int line)
@@ -94,7 +94,7 @@ int InitTcpClientPool()
 		if (it->second->m_iKeep)//需要保持连接的TcpClient才去按配置建立连接
 			iConnectCount = it->second->m_iConnectCount;
 
-		int iResult = pXTcpClientPool->Initialize(it->second->m_strName, it->second->m_strRemoteIP, it->second->m_iRemotePort, iConnectCount);
+		int iResult = pXTcpClientPool->Initialize(it->second);
 		if (iResult != X_SUCCESS)
 		{
 			RELEASE(pXTcpClientPool);
