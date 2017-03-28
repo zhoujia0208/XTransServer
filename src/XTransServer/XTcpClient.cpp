@@ -99,7 +99,21 @@ int XTcpClientPool::GetNewTcpClient(XTcpClient *&pXTcpClient)
 		return X_FAILURE;
 	}
 
-	pXTcpClient = new XTcpClient();
+	try 
+	{
+		pXTcpClient = new XTcpClient();
+	}
+	catch (exception ex)
+	{
+		XLogClass::error("XTcpClientPool::GetNewTcpClient new XTcpClient() Exception: %s", ex.what());
+		return X_FAILURE;
+	}
+	catch (...)
+	{
+		XLogClass::error("XTcpClientPool::GetNewTcpClient new XTcpClient() Unknow Exception");
+		return X_FAILURE;
+	}
+	
 	XTcpResult xTcpResult = pXTcpClient->Connect(m_vRemoteIPs[m_iNewIndex], m_pInfo->m_iRemotePort);
 	if (xTcpResult != Success)
 		return X_FAILURE;
@@ -113,6 +127,8 @@ int XTcpClientPool::GetNewTcpClient(XTcpClient *&pXTcpClient)
 XTcpClient::XTcpClient(void)
 {
 	m_pXLoop = uv_loop_new();
+	if(m_pXLoop == NULL)
+		throw runtime_error("XTcpClient m_pXLoop is NULL");
 	m_pXLoop->data = NULL;
 	xTcpResult = UnKnow;
 
