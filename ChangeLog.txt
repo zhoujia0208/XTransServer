@@ -1,4 +1,7 @@
-﻿V3.2.3.0 20160823
+﻿V3.2.4.0 20170731
+	1、修正ODBC连接mysql和sqlserver数据库时raw类型字段的读取和写入逻辑。
+
+V3.2.3.0 20160823
 	1、修改XTcpClientPool的Initialize方法，支持域名解析，多个连接连到不同IP地址
 	2、修改XConfig命名空间中增加XHostType枚举，支持配置域名的连接池
 	3、配置文件中，原连接池的RemoteIP属性修改为RemoteHost，增加Type属性，默认为IP类型。如需要使用域名类型，则Type="hostname"

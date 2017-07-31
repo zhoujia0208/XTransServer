@@ -304,18 +304,9 @@ int XMySqlConnection::DataTableOTLToX(otl_stream &os, XDataTable &xDataTable)
 			case XDATATYPE_RAW:
 			{
 				pValue = new XDataValue(XDATATYPE_RAW);
-				otl_lob_stream lob;
-				os >> lob;
-				size_t szSize = lob.len();
-				((XDataRaw *)pValue->GetDataPtr())->SetData(NULL, szSize, 1);
-				int n = 0;
-				while (!lob.eof())
-				{
-					otl_long_string ls(((XDataRaw *)pValue->GetDataPtr())->GetData() + n, 1024);//每次最多取1K
-					lob >> ls;
-					n += ls.len();
-				}
-				lob.close();
+				otl_long_string ls(os.get_adb_max_long_size());
+				os >> ls;
+				((XDataRaw *)pValue->GetDataPtr())->SetData(ls.v, ls.len(), 1);
 				break;
 			}
 			case XDATATYPE_TIME:
@@ -343,8 +334,8 @@ int XMySqlConnection::DataTableOTLToX(otl_stream &os, XDataTable &xDataTable)
 int XMySqlConnection::RowExecuteOtl(otl_stream &os, XDataRow &xDataRow)
 {
 	int iItemCount = xDataRow.ItemCount();
-	vector<otl_lob_stream *> vpLobs;
-	vector<int> vIndexs;
+	//vector<otl_lob_stream *> vpLobs;
+	//vector<int> vIndexs;
 	for (int j = 0; j < iItemCount; j++)
 	{
 		if (xDataRow[j].IsNull())
@@ -387,10 +378,10 @@ int XMySqlConnection::RowExecuteOtl(otl_stream &os, XDataRow &xDataRow)
 			break;
 		case XDATATYPE_RAW:
 		{
-			otl_lob_stream *pLob = new otl_lob_stream();
-			os << *pLob;
-			vIndexs.push_back(j);
-			vpLobs.push_back(pLob);
+			BYTE *pV = ((XDataRaw *)xDataRow[j].GetDataPtr())->GetData();
+			size_t szLen = ((XDataRaw *)xDataRow[j].GetDataPtr())->GetSize();
+			otl_long_string ls(pV, szLen, szLen);
+			os << ls;
 			break;
 		}
 		case XDATATYPE_TIME:
@@ -399,18 +390,6 @@ int XMySqlConnection::RowExecuteOtl(otl_stream &os, XDataRow &xDataRow)
 		default:
 			throw runtime_error("xDataTable[i][j].m_xType Not Defined");
 		}
-	}
-
-	for (int i = 0; i < (int)vpLobs.size(); i++)
-	{
-		int j = vIndexs[i];
-		size_t szSize = ((XDataRaw *)xDataRow[j].GetDataPtr())->GetSize();
-		vpLobs[i]->set_len(szSize);
-		otl_long_string ls(((XDataRaw *)xDataRow[j].GetDataPtr())->GetData(), szSize);
-		ls.set_len(szSize);
-		*vpLobs[i] << ls;
-		vpLobs[i]->close();
-		delete vpLobs[i];
 	}
 
 	return X_SUCCESS;

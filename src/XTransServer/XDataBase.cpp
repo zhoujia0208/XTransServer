@@ -320,6 +320,8 @@ namespace XData {
 
 	int XDataBase::_HeartBeat()
 	{
+		//FOR TEST
+		//return X_SUCCESS;
 		XLogClass::debug("XDataBase[" + m_strDbName + "] HeartBeat ......");
 		uv_mutex_lock(&mutex);
 		for (int i = 0; i < m_iConnectCount; i++)
