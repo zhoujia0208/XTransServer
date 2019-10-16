@@ -65,6 +65,7 @@ namespace XNet {
 
 	int XTcpListener::onConnection(XAsyncResult *pXAsyncResult)
 	{
+		int needClosed = false;
 		int iResult = X_SUCCESS;
 		XTcpListener *pXTcpListener = (XTcpListener *)pXAsyncResult->m_pAsyncData;
 
@@ -77,9 +78,9 @@ namespace XNet {
 		//超过配置的最大连接数，则不接受这个链接
 		if (pXTcpListener->mg_iConnectedCount >= pXTcpListener->m_pXListenerInfo->m_iMaxConnectCount)
 		{
-			XLogClass::warn("XTcpListener::onConnection ConnectedCount[%d] >= MaxConnectCount[%d], This connection will not be accepted",
+			XLogClass::warn("XTcpListener::onConnection ConnectedCount[%d] >= MaxConnectCount[%d], This connection be closed",
 				pXTcpListener->mg_iConnectedCount, pXTcpListener->m_pXListenerInfo->m_iMaxConnectCount);
-			return X_FAILURE;
+			needClosed = true;
 		}
 
 		XTcpConnection *pXTcpConn = new XTcpConnection();
@@ -97,6 +98,13 @@ namespace XNet {
 			return X_FAILURE;
 		}
 
+		//修正超过连接不监听问题，先accept下来再马上关闭。
+		if (needClosed)
+		{
+			delete pXTcpConn;
+			return X_FAILURE;
+		}
+		
 		iResult = pXTcpConn->ReadAsync(pXTcpListener->m_pXListenerInfo->m_iTimeOut, &pXTcpConn->m_xarRead, onRead);
 		if (iResult != 0)
 		{
