@@ -320,12 +320,15 @@ namespace XData {
 
 	int XDataBase::_HeartBeat()
 	{
+		//FOR TEST
+		//return X_SUCCESS;
 		XLogClass::debug("XDataBase[" + m_strDbName + "] HeartBeat ......");
 		uv_mutex_lock(&mutex);
 		for (int i = 0; i < m_iConnectCount; i++)
 		{
 			if (!m_vxDbConns[i]->m_isUsed)
 			{
+				//judge if timeup, can remove to ensure each connection do heartbeat
 				if (uv_hrtime() - m_vxDbConns[i]->m_ui64LastUseTime >(uint64_t)m_iHeartbeatInterval * 1000000)
 				{
 					m_vxDbConns[i]->m_isUsed = true;
@@ -334,7 +337,7 @@ namespace XData {
 					int iResult = m_vxDbConns[i]->HeartBeat();
 					if (iResult != X_SUCCESS)
 					{
-						//执行简单sql失败就重连
+						//Execute simple Sql, reconnect if fail
 						m_vxDbConns[i]->Close();
 						m_vxDbConns[i]->Open(m_strConnectString);
 					}

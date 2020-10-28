@@ -1,46 +1,49 @@
 #pragma once
-#ifndef __XSQLSERVERCONNECTION_H__
-#define __XSQLSERVERCONNECTION_H__
 
-#define OTL_ODBC_MSSQL_2008
+#define OTL_ODBC // CompileOTL 4.0/ODBC
+#define OTL_ODBC_SELECT_STM_EXECUTE_BEFORE_DESCRIBE
 #define OTL_STL
-//#define OTL_ANSI_CPP
-#define OTL_MAX_CHAR_SIZE 1024
+#define OTL_UTF8 // CompileOTL with Unicode
+#define OTL_STREAM_NO_PRIVATE_UNSIGNED_LONG_OPERATORS
 
 #ifdef _WIN32 
 #define OTL_BIGINT int64_t
 #define OTL_UBIGINT uint64_t
+#else
+#define OTL_ODBC_UNIX
+#define OTL_BIGINT long long
+#define OTL_UBIGINT unsigned long long
 #endif
 
-//#define OTL_STREAM_POOLING_ON
 #include "otlv4.h"
+using namespace XData;
 
 class XSqlServerConnection : public XDataBaseConnection
 {
 public:
 	static XDataBaseConnection* CreateInstance()
-	{ 
+	{
 		return new XSqlServerConnection();
 	};
 	static XRegistyDataBaseConnectionClass xRegisty;
 
 public:
-	XSqlServerConnection(void);
-	~XSqlServerConnection(void);
+	XSqlServerConnection();
+	~XSqlServerConnection();
 
 	int Initialize();
 	int Terminate();
-	// 连接SqlServer数据库
-	int Open(string strConnectString);
+	// 连接Oracle数据库
+	int Open(const string & strConnectString);
 
-	// 关闭SqlServer数据库
+	// 关闭Oracle数据库
 	int Close();
 
 	// 查询指定SQL
-	int Query(string strSql, int iArraySize, XDataTable &xDataTable);
+	int Query(const string &strSql, XDataRow &xDataRow, const int iArraySize, XDataTable &xDataTable);
 
 	// 执行指定SQL
-	int ExecuteSql(string strSql, int64_t &i64RecordCount);
+	int ExecuteSql(const string &strSql, XDataTable &xDataTable, int64_t &i64RecordCount);
 
 	//开始事务
 	int BeginTransaction();
@@ -55,13 +58,7 @@ public:
 	int HeartBeat();
 
 private:
-	static int ToXDataTable(otl_stream &os, XDataTable &xDataTable);
+	static int DataTableOTLToX(otl_stream &os, XDataTable &xDataTable);
+	static int RowExecuteOtl(otl_stream &os, XDataRow &xDataRow);
 	otl_connect db;
 };
-
-//#undef OTL_ODBC_MSSQL_2008
-//#undef OTL_STL
-//#undef OTL_ANSI_CPP
-////#undef OTL_MAX_CHAR_SIZE
-
-#endif //__XORACLECONNECTION_H__

@@ -1,12 +1,16 @@
 ﻿#include "StdAfx.h"
 #include "XServer.h"
 #include "XTransServer.h"
+#include "XTest.h"
 
 int main(int argc, char* argv[])
 {
+	
 	if (DoInitialize() != X_SUCCESS)
 		return X_FAILURE;
 
+	//FOR TEST
+	//TestFunction();
 	while(true)
 	{
 		uv_run(uv_default_loop(), UV_RUN_DEFAULT);
